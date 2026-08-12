@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<title>食帖 · 食谱收藏</title>
+<meta name="theme-color" content="#D4784C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="食帖">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   "KITCHEN WARMTH" — Japanese cookbook × culinary journal
+   design-styles: Editorial/Warm + Wabi-Sabi Organic
+   font: Noto Serif SC display + Noto Sans SC body
+   ================================================================ */
+:root {
+  --ink:    #3D2C24;
+  --ink-m:  #7A685E;
+  --ink-s:  #B0A094;
+  --bg:     #FFFBF5;
+  --card:   #FFFEFB;
+  --border: #EDE4D8;
+  --border-s:#D6C8B4;
+  --accent: #D4784C;
+  --accent-l:#E8986C;
+  --accent-soft:#FBF2EA;
+  --olive:  #7A9A5C;
+  --olive-soft:#F2F6ED;
+  --sage:   #6A9A8A;
+  --sage-soft:#EDF5F2;
+  --berry:  #B85C6A;
+  --berry-soft:#F9EEF0;
+  --honey:  #C8983A;
+  --honey-soft:#FBF3E2;
+  --font-display:"Noto Serif SC","Georgia",serif;
+  --font-body:"Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  --font-mono:"SF Mono","Cascadia Code","Consolas",monospace;
+  --radius:14px;--radius-sm:8px;--radius-lg:20px;
+  --space-xs:4px;--space-sm:8px;--space:16px;--space-md:24px;--space-lg:36px;--space-xl:56px;
+  --sidebar-w:210px;
+  --transition:0.2s cubic-bezier(0.22,0.61,0.36,1);
+}
+
+[data-theme="dark"] {
+  --ink:    #E8DDD2;
+  --ink-m:  #A89885;
+  --ink-s:  #7A685E;
+  --bg:     #1C1814;
+  --card:   #25201B;
+  --border: #3A3028;
+  --border-s:#504438;
+  --accent: #E8986C;
+  --accent-l:#D4784C;
+  --accent-soft:#30261E;
+  --olive:  #8AB86C;
+  --olive-soft:#222E1A;
+  --sage:   #7AB8A0;
+  --sage-soft:#1A2E28;
+  --berry:  #D07880;
+  --berry-soft:#342020;
+  --honey:  #D9A858;
+  --honey-soft:#342818;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;}
+body{
+  font-family:var(--font-body);font-weight:400;background:var(--bg);color:var(--ink);
+  min-height:100vh;line-height:1.6;transition:background .3s,color .3s;
+}
+
+/* Paper texture */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.3;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+/* ===== AMBIENT ===== */
+.ambient{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.amb-orb{
+  position:absolute;border-radius:50%;filter:blur(60px);opacity:.1;
+  animation:orbDrift 14s ease-in-out infinite;
+}
+.amb-orb.o1{width:220px;height:220px;background:radial-gradient(circle,rgba(212,120,76,.3),transparent 70%);top:5%;right:-5%;animation-delay:0s;}
+.amb-orb.o2{width:180px;height:180px;background:radial-gradient(circle,rgba(122,154,92,.25),transparent 70%);bottom:10%;left:-3%;animation-delay:4s;}
+.amb-orb.o3{width:160px;height:160px;background:radial-gradient(circle,rgba(200,152,58,.2),transparent 70%);top:50%;right:8%;animation-delay:8s;}
+@keyframes orbDrift{
+  0%,100%{transform:translate(0,0) scale(1);}
+  33%{transform:translate(25px,-20px) scale(1.12);}
+  66%{transform:translate(-15px,25px) scale(.9);}
+}
+
+/* ===== LAYOUT ===== */
+.app{display:flex;min-height:100vh;position:relative;z-index:1;}
+.sidebar{
+  position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);
+  background:var(--card);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:40;padding:var(--space-md) 0;
+  transition:transform .3s;
+}
+.sidebar-brand{
+  padding:0 var(--space-md) var(--space-md);
+  font-size:20px;font-weight:700;font-family:var(--font-display);
+  display:flex;align-items:center;gap:var(--space-sm);
+  border-bottom:1px solid var(--border);margin-bottom:var(--space-sm);
+  color:var(--accent);letter-spacing:-.3px;
+}
+.sidebar-brand .brand-icon{font-size:24px;}
+.sidebar-nav{flex:1;padding:0 var(--space-sm);}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);
+  cursor:pointer;font-size:14px;font-weight:500;color:var(--ink-m);transition:all var(--transition);
+  margin-bottom:3px;border:none;background:none;width:100%;font-family:var(--font-body);
+}
+.nav-item:hover{background:var(--accent-soft);color:var(--ink);}
+.nav-item.active{background:var(--accent);color:#FFF;font-weight:600;}
+.nav-item .ni-icon{font-size:16px;width:20px;text-align:center;}
+.nav-item .ni-badge{margin-left:auto;font-size:10px;background:rgba(255,255,255,.25);color:#FFF;padding:2px 8px;border-radius:10px;min-width:20px;text-align:center;}
+.sidebar-footer{padding:var(--space) var(--space-md);border-top:1px solid var(--border);font-size:12px;color:var(--ink-s);}
+.sidebar-quote{padding:var(--space-sm) var(--space-md);margin-top:auto;border-top:1px solid var(--border);text-align:center;}
+.sidebar-quote .sq-text{font-size:12px;font-family:var(--font-display);font-style:italic;color:var(--ink-m);line-height:1.6;}
+
+.main{flex:1;margin-left:var(--sidebar-w);padding:var(--space-lg);max-width:920px;transition:margin .3s;}
+
+/* ===== HERO ===== */
+.hero{
+  background:linear-gradient(135deg,var(--accent-soft),var(--honey-soft));
+  border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:var(--space-lg);margin-bottom:var(--space-md);
+  display:flex;align-items:center;gap:var(--space-md);position:relative;overflow:hidden;
+}
+.hero-emoji{font-size:64px;flex-shrink:0;animation:breathe 4s ease-in-out infinite;}
+@keyframes breathe{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+.hero-text{flex:1;}
+.hero-text .ht-label{font-size:12px;font-weight:600;color:var(--accent);letter-spacing:2px;margin-bottom:4px;}
+.hero-text .ht-title{font-size:26px;font-weight:900;font-family:var(--font-display);margin-bottom:4px;line-height:1.2;}
+.hero-text .ht-sub{font-size:14px;color:var(--ink-m);}
+
+/* ===== RANDOM PICKER SECTION ===== */
+.random-section{
+  background:var(--card);border:2px dashed var(--accent);border-radius:var(--radius-lg);
+  padding:var(--space-md);margin-bottom:var(--space-md);text-align:center;
+  transition:all var(--transition);
+}
+.random-section:hover{border-color:var(--accent-l);background:var(--accent-soft);}
+.random-btn{
+  display:inline-block;padding:12px 32px;background:var(--accent);color:#FFF;
+  border:none;border-radius:20px;font-size:16px;font-weight:600;cursor:pointer;
+  font-family:var(--font-body);transition:all var(--transition);margin-bottom:var(--space-sm);
+}
+.random-btn:hover{filter:brightness(1.08);transform:translateY(-2px);box-shadow:0 6px 20px rgba(212,120,76,.3);}
+.random-btn.spinning{animation:spinPick .6s ease-out;}
+@keyframes spinPick{
+  0%{transform:rotate(0deg) scale(1);}
+  25%{transform:rotate(15deg) scale(1.05);}
+  50%{transform:rotate(-10deg) scale(.95);}
+  75%{transform:rotate(5deg) scale(1.02);}
+  100%{transform:rotate(0deg) scale(1);}
+}
+.random-result{font-size:20px;font-weight:700;font-family:var(--font-display);color:var(--accent);min-height:32px;transition:all .3s;}
+.random-result .rr-emoji{font-size:36px;display:block;margin-bottom:4px;}
+.random-result .rr-tags{font-size:12px;color:var(--ink-m);font-weight:400;margin-top:4px;}
+
+/* ===== SECTION HEADER ===== */
+.sec-hd{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-sm);
+  font-size:13px;font-weight:600;color:var(--ink-m);letter-spacing:.5px;
+}
+
+/* ===== TOOLBAR ===== */
+.toolbar{display:flex;gap:var(--space-sm);margin-bottom:var(--space-sm);align-items:center;flex-wrap:wrap;}
+.tbtn{
+  padding:5px 14px;border-radius:16px;border:1.5px solid var(--border);background:var(--card);
+  font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-body);color:var(--ink-m);transition:all var(--transition);
+}
+.tbtn:hover{border-color:var(--border-s);}
+.tbtn.active{background:var(--accent);color:#FFF;border-color:var(--accent);}
+
+/* ===== SEARCH ===== */
+.search-wrap{position:relative;margin-bottom:var(--space-sm);}
+.search-input{
+  width:100%;padding:10px 16px 10px 38px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  background:var(--card);font-size:14px;font-family:var(--font-body);color:var(--ink);outline:none;transition:border var(--transition);
+}
+.search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+.search-input::placeholder{color:var(--ink-s);}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--ink-s);pointer-events:none;}
+
+/* ===== ADD BAR ===== */
+.add-bar{display:flex;gap:var(--space-sm);margin-bottom:var(--space-sm);}
+.add-input{
+  flex:1;padding:11px 16px;border:2px solid var(--border);border-radius:var(--radius-sm);
+  background:var(--card);font-size:15px;font-family:var(--font-body);color:var(--ink);outline:none;transition:border var(--transition);
+}
+.add-input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);}
+.add-input::placeholder{color:var(--ink-s);}
+.add-btn{
+  padding:11px 24px;background:var(--accent);color:#FFF;border:none;border-radius:var(--radius-sm);
+  font-size:14px;font-weight:600;cursor:pointer;transition:all var(--transition);white-space:nowrap;font-family:var(--font-body);
+}
+.add-btn:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 4px 14px rgba(212,120,76,.3);}
+
+/* ===== RECIPE GRID ===== */
+.recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:var(--space);}
+.recipe-card{
+  background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);
+  overflow:hidden;cursor:pointer;transition:all var(--transition);position:relative;
+}
+.recipe-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.06);border-color:var(--border-s);}
+.recipe-card .rc-img{
+  height:140px;display:flex;align-items:center;justify-content:center;
+  font-size:56px;position:relative;overflow:hidden;
+}
+.recipe-card .rc-img.cat-家常菜{background:linear-gradient(135deg,#FEF3E4,#FDE8D0);}
+.recipe-card .rc-img.cat-面食{background:linear-gradient(135deg,#FEFAE4,#FDF5CA);}
+.recipe-card .rc-img.cat-汤品{background:linear-gradient(135deg,#F0F8F0,#E2F0E2);}
+.recipe-card .rc-img.cat-甜品{background:linear-gradient(135deg,#FDF0F2,#FBE0E4);}
+.recipe-card .rc-img.cat-早餐{background:linear-gradient(135deg,#FFF5E8,#FFE8CC);}
+.recipe-card .rc-img.cat-饮品{background:linear-gradient(135deg,#F0F4FA,#DEE8F4);}
+.recipe-card .rc-img.cat-其他{background:linear-gradient(135deg,#F5F5F5,#E8E8E8);}
+.recipe-card .rc-fav{
+  position:absolute;top:10px;right:10px;font-size:20px;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.15));transition:transform .2s;
+}
+.recipe-card .rc-fav:hover{transform:scale(1.2);}
+.recipe-card .rc-body{padding:var(--space-sm) var(--space);}
+.recipe-card .rc-name{font-size:17px;font-weight:700;font-family:var(--font-display);margin-bottom:4px;line-height:1.3;}
+.recipe-card .rc-meta{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--ink-m);}
+.recipe-card .rc-tag{
+  display:inline-flex;align-items:center;gap:3px;padding:2px 8px;
+  border-radius:10px;font-size:11px;font-weight:600;
+}
+.rc-tag.time{background:var(--olive-soft);color:var(--olive);}
+.rc-tag.diff{background:var(--honey-soft);color:var(--honey);}
+.rc-tag.diff.easy{background:var(--olive-soft);color:var(--olive);}
+.rc-tag.diff.hard{background:var(--berry-soft);color:var(--berry);}
+
+/* ===== RECIPE DETAIL MODAL ===== */
+.modal-overlay{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.4);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal-dialog{
+  background:var(--card);border-radius:var(--radius-lg);width:540px;max-width:92vw;max-height:85vh;
+  overflow-y:auto;position:relative;box-shadow:0 24px 60px rgba(0,0,0,.2);
+}
+.modal-close{position:sticky;top:12px;float:right;z-index:2;width:36px;height:36px;border-radius:50%;background:var(--card);border:1.5px solid var(--border);font-size:18px;cursor:pointer;color:var(--ink-s);display:flex;align-items:center;justify-content:center;margin-right:12px;}
+.modal-detail{padding:0 var(--space-lg) var(--space-lg);}
+.modal-detail .md-header{text-align:center;padding-top:var(--space);}
+.modal-detail .md-emoji{font-size:64px;display:block;margin-bottom:var(--space-sm);}
+.modal-detail .md-name{font-size:26px;font-weight:900;font-family:var(--font-display);margin-bottom:var(--space-sm);}
+.modal-detail .md-meta{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:var(--space);}
+.modal-detail .md-section{margin-bottom:var(--space);}
+.modal-detail .md-section h4{font-size:15px;font-weight:700;font-family:var(--font-display);margin-bottom:8px;color:var(--accent);display:flex;align-items:center;gap:6px;}
+.modal-detail .ingredient-list{list-style:none;}
+.modal-detail .ingredient-list li{
+  display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dotted var(--border);
+  font-size:14px;
+}
+.modal-detail .ingredient-list li .ing-name{font-weight:500;}
+.modal-detail .ingredient-list li .ing-amount{color:var(--ink-m);}
+.modal-detail .step-list{list-style:none;counter-reset:step;}
+.modal-detail .step-list li{
+  counter-increment:step;padding:10px 0 10px 36px;position:relative;
+  border-bottom:1px solid var(--border);font-size:14px;line-height:1.6;
+}
+.modal-detail .step-list li::before{
+  content:counter(step);position:absolute;left:0;top:10px;
+  width:24px;height:24px;border-radius:50%;background:var(--accent);
+  color:#FFF;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;
+}
+.modal-detail .md-notes{
+  background:var(--accent-soft);padding:var(--space-sm) var(--space);border-radius:var(--radius-sm);
+  font-size:13px;color:var(--ink-m);line-height:1.6;
+}
+.modal-actions{display:flex;gap:var(--space-sm);justify-content:center;padding:var(--space) 0;border-top:1px solid var(--border);}
+.modal-actions button{
+  padding:9px 20px;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:all var(--transition);
+}
+.modal-actions .btn-primary{background:var(--accent);color:#FFF;}
+.modal-actions .btn-primary:hover{filter:brightness(1.08);}
+.modal-actions .btn-cancel{background:var(--border);color:var(--ink);}
+
+/* ===== ADD/EDIT MODAL ===== */
+.modal-field{margin-bottom:var(--space-sm);}
+.modal-field label{display:block;font-size:13px;font-weight:600;color:var(--ink-m);margin-bottom:4px;}
+.modal-field input,.modal-field select,.modal-field textarea{
+  width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-size:14px;font-family:var(--font-body);color:var(--ink);background:var(--bg);outline:none;resize:vertical;
+}
+.modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+.modal-field textarea{min-height:50px;}
+.modal-field .field-row{display:flex;gap:var(--space-sm);}
+.modal-field .field-row>*{flex:1;}
+.ingredient-row{display:flex;gap:6px;align-items:center;margin-bottom:6px;}
+.ingredient-row input{padding:6px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:var(--font-body);background:var(--bg);outline:none;}
+.ingredient-row input:focus{border-color:var(--accent);}
+.ingredient-row input.ing-name{flex:3;}
+.ingredient-row input.ing-amount{flex:1;}
+.ingredient-row input.ing-unit{flex:1;}
+.ingredient-row button{background:none;border:none;color:var(--rose);cursor:pointer;font-size:16px;padding:4px;}
+
+/* ===== TOAST / UNDO ===== */
+.toast{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:99;background:var(--ink);color:var(--card);padding:10px 24px;border-radius:20px;font-size:14px;font-weight:500;pointer-events:none;opacity:0;transition:all .3s;}
+.toast.show{opacity:1;top:40px;}
+.undo-bar{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:99;background:var(--ink);color:var(--card);padding:10px 20px;border-radius:20px;font-size:14px;display:none;align-items:center;gap:12px;white-space:nowrap;box-shadow:0 8px 30px rgba(0,0,0,.15);}
+.undo-bar.show{display:flex;}
+.undo-bar button{background:transparent;color:var(--accent-l);border:none;font-weight:600;cursor:pointer;font-size:14px;font-family:var(--font-body);}
+
+/* Theme toggle */
+.theme-tgl{position:fixed;top:16px;right:60px;width:42px;height:42px;border-radius:50%;border:1.5px solid var(--border);cursor:pointer;background:var(--card);font-size:18px;z-index:30;transition:all var(--transition);display:flex;align-items:center;justify-content:center;}
+.theme-tgl:hover{transform:scale(1.1);border-color:var(--accent);box-shadow:0 4px 14px rgba(0,0,0,.08);}
+
+/* Save dot */
+.save-dot{
+  position:fixed;bottom:28px;left:28px;z-index:50;pointer-events:none;
+  font-size:12px;color:var(--olive);font-weight:600;opacity:0;transition:opacity .4s;
+}
+.save-dot.show{opacity:1;}
+
+/* Empty state */
+.empty-state{
+  text-align:center;padding:var(--space-xl) var(--space);
+}
+.empty-state .es-frame{
+  display:inline-block;padding:var(--space-md) var(--space-lg);
+  border:2px dashed var(--border-s);border-radius:var(--radius-lg);
+  margin-bottom:var(--space);
+}
+.empty-state .es-icon{font-size:56px;display:block;margin-bottom:var(--space-sm);}
+.empty-state .es-title{font-size:17px;font-weight:700;font-family:var(--font-display);color:var(--ink);margin-bottom:4px;}
+.empty-state .es-desc{font-size:13px;color:var(--ink-m);max-width:340px;margin:0 auto;line-height:1.6;}
+.empty-state .es-arrow{font-size:28px;color:var(--accent);animation:bounceDown 1.5s ease-in-out infinite;margin-top:var(--space-sm);}
+@keyframes bounceDown{0%,100%{transform:translateY(0);}50%{transform:translateY(8px);}}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);}.sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;padding:calc(var(--space) + env(safe-area-inset-top)) var(--space-sm) 92px;}
+  .hero{padding:var(--space);}.hero-emoji{font-size:42px;}
+  .hero-text .ht-title{font-size:22px;}
+  .recipe-grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:var(--space-sm);}
+  .recipe-card .rc-img{height:110px;font-size:44px;}
+  /* iOS 输入框防自动缩放：输入控件字号至少 16px */
+  input,select,textarea{font-size:16px!important;}
+  /* 触控目标 ≥44px */
+  .add-btn{padding:13px 20px;font-size:15px;}
+  .add-input{padding:13px 14px;}
+  .nav-item{padding:12px 14px;min-height:44px;}
+  .tbtn{padding:8px 16px;min-height:40px;}
+  .random-btn{padding:14px 30px;font-size:17px;}
+  .theme-tgl{top:calc(12px + env(safe-area-inset-top));right:12px;width:44px;height:44px;}
+  .toast{top:calc(16px + env(safe-area-inset-top));}
+  .mob-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);z-index:40;padding-bottom:env(safe-area-inset-bottom);}
+  .mob-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0;font-size:11px;color:var(--ink-m);border:none;background:none;cursor:pointer;font-family:var(--font-body);gap:2px;min-height:54px;}
+  .mob-nav-item.active{color:var(--accent);font-weight:600;}
+  .mob-nav-item .icon{font-size:22px;}
+  /* 弹窗安全区 */
+  .modal-dialog{margin:calc(var(--space) + env(safe-area-inset-top)) var(--space-sm) calc(var(--space) + env(safe-area-inset-bottom));max-height:calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - var(--space-md));}
+}
+@media(min-width:769px){.mob-nav,.menu-btn{display:none;}.main{padding-bottom:var(--space-xl);}}
+</style>
+</head>
+<body>
+
+<!-- Ambient -->
+<div class="ambient">
+  <div class="amb-orb o1"></div><div class="amb-orb o2"></div><div class="amb-orb o3"></div>
+</div>
+
+<div class="app">
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand"><span class="brand-icon">🍽️</span> 食帖</div>
+  <nav class="sidebar-nav">
+    <button class="nav-item active" data-tab="all" onclick="switchTab('all')"><span class="ni-icon">📖</span>全部食谱<span class="ni-badge" id="allCount">0</span></button>
+    <button class="nav-item" data-tab="fav" onclick="switchTab('fav')"><span class="ni-icon">❤️</span>我的收藏</button>
+    <button class="nav-item" data-tab="picker" onclick="switchTab('picker')"><span class="ni-icon">🎲</span>今天吃什么</button>
+  </nav>
+  <div class="sidebar-quote"><div class="sq-text" id="sidebarQuote"></div></div>
+  <div class="sidebar-footer">📖 共 <span id="recipeCount2">0</span> 道食谱</div>
+</aside>
+
+<!-- ===== MAIN ===== -->
+<main class="main">
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-emoji">👨‍🍳</div>
+  <div class="hero-text">
+    <div class="ht-label">RECIPE COLLECTION</div>
+    <div class="ht-title" id="heroTitle">收集美味，料理生活</div>
+    <div class="ht-sub" id="heroSub">每一道菜都是一段温暖的记忆</div>
+  </div>
+</div>
+
+<!-- TAB: All Recipes -->
+<div class="tab-panel active" id="tab-all">
+  <div class="random-section">
+    <button class="random-btn" id="randomBtn" onclick="pickRandom()">🎲 今天吃什么？</button>
+    <div class="random-result" id="randomResult"></div>
+  </div>
+  <div class="toolbar">
+    <button class="tbtn active" onclick="setCategory('all',this)">📖 全部</button>
+    <button class="tbtn" onclick="setCategory('家常菜',this)">🥘 家常菜</button>
+    <button class="tbtn" onclick="setCategory('面食',this)">🍜 面食</button>
+    <button class="tbtn" onclick="setCategory('汤品',this)">🍲 汤品</button>
+    <button class="tbtn" onclick="setCategory('甜品',this)">🍰 甜品</button>
+    <button class="tbtn" onclick="setCategory('早餐',this)">🥐 早餐</button>
+    <button class="tbtn" onclick="setCategory('饮品',this)">🥤 饮品</button>
+    <button class="tbtn" onclick="setCategory('其他',this)">📌 其他</button>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="searchInput" placeholder="搜索食谱名称、食材或标签…" oninput="renderRecipes()">
+  </div>
+  <div class="add-bar">
+    <input class="add-input" id="recipeInput" placeholder="快速添加食谱名称…" onkeydown="if(event.key==='Enter')quickAdd()">
+    <button class="add-btn" onclick="quickAdd()">＋ 快速添加</button>
+    <button class="add-btn" style="background:var(--olive);" onclick="openEditModal()">📝 详细添加</button>
+  </div>
+  <div class="recipe-grid" id="recipeGrid"></div>
+</div>
+
+<!-- TAB: Favorites -->
+<div class="tab-panel" id="tab-fav">
+  <div class="sec-hd">❤️ 收藏的食谱</div>
+  <div class="recipe-grid" id="favGrid"></div>
+</div>
+
+<!-- TAB: Picker -->
+<div class="tab-panel" id="tab-picker">
+  <div class="random-section" style="padding:var(--space-xl);">
+    <div style="font-size:72px;margin-bottom:var(--space);" id="pickerEmoji">🍽️</div>
+    <button class="random-btn" onclick="pickRandomBig()" style="font-size:20px;padding:14px 40px;">🎲 今天吃什么？</button>
+    <div class="random-result" id="pickerResult" style="font-size:28px;margin-top:var(--space);"></div>
+    <div style="font-size:13px;color:var(--ink-s);margin-top:var(--space-sm);">选择困难症患者的福音 ✨</div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- ===== MOBILE NAV ===== -->
+<nav class="mob-nav" id="mobNav">
+  <button class="mob-nav-item active" data-tab="all" onclick="switchTab('all')"><span class="icon">📖</span>食谱</button>
+  <button class="mob-nav-item" data-tab="fav" onclick="switchTab('fav')"><span class="icon">❤️</span>收藏</button>
+  <button class="mob-nav-item" data-tab="picker" onclick="switchTab('picker')"><span class="icon">🎲</span>吃啥</button>
+</nav>
+
+<!-- ===== RECIPE DETAIL MODAL ===== -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-dialog">
+    <button class="modal-close" onclick="closeDetail()">✕</button>
+    <div class="modal-detail" id="detailContent"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeDetail()">关闭</button>
+      <button class="btn-primary" id="detailEditBtn" onclick="editFromDetail()">✏️ 编辑</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EDIT MODAL ===== -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-dialog">
+    <button class="modal-close" onclick="closeEdit()">✕</button>
+    <div style="padding:var(--space-lg);">
+      <h3 style="font-size:20px;font-weight:700;font-family:var(--font-display);margin-bottom:var(--space);" id="editTitle">📝 添加食谱</h3>
+      <div class="modal-field"><label>食谱名称</label><input id="eName" placeholder="如「番茄炒蛋」"></div>
+      <div class="modal-field"><label>图标 Emoji</label><input id="eEmoji" placeholder="如 🍳" maxlength="4" style="font-size:24px;width:60px;text-align:center;"></div>
+      <div class="modal-field"><div class="field-row">
+        <div><label>分类</label><select id="eCat"><option value="家常菜">🥘 家常菜</option><option value="面食">🍜 面食</option><option value="汤品">🍲 汤品</option><option value="甜品">🍰 甜品</option><option value="早餐">🥐 早餐</option><option value="饮品">🥤 饮品</option><option value="其他">📌 其他</option></select></div>
+        <div><label>烹饪时间(分钟)</label><input type="number" id="eTime" value="30" min="1"></div>
+      </div></div>
+      <div class="modal-field"><div class="field-row">
+        <div><label>难度</label><select id="eDiff"><option value="easy">🌿 简单</option><option value="medium" selected>⚡ 中等</option><option value="hard">🔥 困难</option></select></div>
+        <div><label>份量</label><input id="eServings" placeholder="如 2人份" value="2人份"></div>
+      </div></div>
+      <div class="modal-field">
+        <label>🥬 食材清单</label>
+        <div id="ingredientList"></div>
+        <button class="tbtn" onclick="addIngredient()" style="margin-top:4px;">＋ 添加食材</button>
+      </div>
+      <div class="modal-field">
+        <label>📋 烹饪步骤</label>
+        <div id="stepList"></div>
+        <button class="tbtn" onclick="addStep()" style="margin-top:4px;">＋ 添加步骤</button>
+      </div>
+      <div class="modal-field"><label>💬 备注</label><textarea id="eNotes" placeholder="烹饪小贴士…"></textarea></div>
+      <div class="modal-actions" style="border:none;padding:0;">
+        <button class="btn-cancel" onclick="closeEdit()">取消</button>
+        <button class="btn-primary" id="editSaveBtn" onclick="saveRecipe()">💾 保存食谱</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="undo-bar" id="undoBar"><span id="undoMsg"></span><button onclick="undoAction()">↩ 撤销</button><button onclick="dismissUndo()">✕</button></div>
+<div class="theme-tgl" onclick="toggleTheme()" title="切换主题">🌙</div>
+<div class="save-dot" id="saveDot">✓ 已自动保存</div>
+
+<script>
+// ═══════════════ STATE ═══════════════
+const K='rcp_data',TK='rcp_theme';
+let recipes=[],activeTab='all',selCat='all',undoStack=[],editingId=null,detailId=null,tempIngredients=[],tempSteps=[];
+
+const foodQuotes=[
+  '人生苦短，再来一碗', '唯有爱与美食不可辜负', '吃是最好的安慰',
+  '人间烟火气，最抚凡人心', '一日三餐，四季有你', '美食是身体的歌',
+  '没有什么是一顿美食解决不了的', '胃满了，心就满了',
+];
+
+function load(){try{recipes=JSON.parse(localStorage.getItem(K))||[];}catch{recipes=[];}}
+function save(){localStorage.setItem(K,JSON.stringify(recipes));flashSave();}
+let saveDotTimer;
+function flashSave(){const el=document.getElementById('saveDot');if(!el)return;el.classList.add('show');clearTimeout(saveDotTimer);saveDotTimer=setTimeout(()=>el.classList.remove('show'),1200);}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+// Theme
+function initTheme(){const s=localStorage.getItem(TK)||'light';document.documentElement.setAttribute('data-theme',s);document.querySelector('.theme-tgl').textContent=s==='dark'?'☀️':'🌙';}
+function toggleTheme(){const c=document.documentElement.getAttribute('data-theme'),n=c==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);document.querySelector('.theme-tgl').textContent=n==='dark'?'☀️':'🌙';localStorage.setItem(TK,n);}
+
+// Toast / Undo
+let toastTmr;
+function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');clearTimeout(toastTmr);toastTmr=setTimeout(()=>e.classList.remove('show'),2200);}
+function showUndo(msg,fn){document.getElementById('undoMsg').textContent=msg;undoStack.push(fn);document.getElementById('undoBar').classList.add('show');}
+function undoAction(){if(undoStack.length)undoStack.pop()();document.getElementById('undoBar').classList.remove('show');}
+function dismissUndo(){undoStack.pop();document.getElementById('undoBar').classList.remove('show');}
+
+// Category filter
+function setCategory(cat,el){
+  selCat=cat;document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderRecipes();
+}
+function switchTab(tab){
+  activeTab=tab;
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  const tp=document.getElementById('tab-'+tab);if(tp)tp.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"].nav-item`)?.classList.add('active');
+  document.querySelectorAll('.mob-nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"].mob-nav-item`)?.classList.add('active');
+  renderAll();
+}
+
+// Get filtered recipes
+function getFiltered(){
+  let rs=recipes;
+  if(activeTab==='fav')rs=rs.filter(r=>r.favorite);
+  if(activeTab==='all'&&selCat!=='all')rs=rs.filter(r=>r.category===selCat);
+  const q=(document.getElementById('searchInput')?.value||'').trim().toLowerCase();
+  if(q)rs=rs.filter(r=>r.name.toLowerCase().includes(q)||r.category.includes(q)||(r.ingredients||[]).some(i=>i.name.toLowerCase().includes(q))||(r.notes||'').toLowerCase().includes(q));
+  return rs;
+}
+
+// Quick add
+function quickAdd(){
+  const inp=document.getElementById('recipeInput');if(!inp)return;
+  const name=inp.value.trim();if(!name){inp.focus();return;}
+  recipes.unshift({id:Date.now(),name,emoji:'🍽️',category:selCat==='all'?'家常菜':selCat,time:30,difficulty:'medium',servings:'2人份',ingredients:[],steps:[],notes:'',favorite:false,createdAt:new Date().toISOString()});
+  inp.value='';save();renderAll();toast('✅ 已添加「'+name+'」');inp.focus();
+}
+
+// Edit modal
+function openEditModal(id){
+  editingId=id||null;tempIngredients=[];tempSteps=[];
+  if(id){
+    const r=recipes.find(x=>x.id===id);if(!r)return;
+    document.getElementById('editTitle').textContent='✏️ 编辑食谱';
+    document.getElementById('eName').value=r.name;
+    document.getElementById('eEmoji').value=r.emoji||'🍽️';
+    document.getElementById('eCat').value=r.category;
+    document.getElementById('eTime').value=r.time;
+    document.getElementById('eDiff').value=r.difficulty;
+    document.getElementById('eServings').value=r.servings||'';
+    document.getElementById('eNotes').value=r.notes||'';
+    tempIngredients=(r.ingredients||[]).map(i=>({...i}));
+    tempSteps=(r.steps||[]).map((s,i)=>({id:s.id||Date.now()+i,text:s.text}));
+  }else{
+    document.getElementById('editTitle').textContent='📝 添加食谱';
+    document.getElementById('eName').value='';document.getElementById('eEmoji').value='🍽️';
+    document.getElementById('eCat').value=selCat==='all'?'家常菜':selCat;
+    document.getElementById('eTime').value='30';document.getElementById('eDiff').value='medium';
+    document.getElementById('eServings').value='2人份';document.getElementById('eNotes').value='';
+  }
+  renderEditIngredients();renderEditSteps();
+  document.getElementById('editModal').classList.add('show');
+  setTimeout(()=>document.getElementById('eName').focus(),100);
+}
+function closeEdit(){document.getElementById('editModal').classList.remove('show');editingId=null;}
+
+function addIngredient(){tempIngredients.push({name:'',amount:'',unit:''});renderEditIngredients();}
+function removeIngredient(i){tempIngredients.splice(i,1);renderEditIngredients();}
+function updateIngredient(i,field,value){if(tempIngredients[i])tempIngredients[i][field]=value;}
+function renderEditIngredients(){
+  const el=document.getElementById('ingredientList');
+  if(tempIngredients.length===0){el.innerHTML='<div style="font-size:12px;color:var(--ink-s);padding:4px 0;">点击下方按钮添加食材</div>';return;}
+  el.innerHTML=tempIngredients.map((ing,i)=>`<div class="ingredient-row">
+    <input class="ing-name" placeholder="食材名" value="${esc(ing.name)}" oninput="updateIngredient(${i},'name',this.value)">
+    <input class="ing-amount" placeholder="数量" value="${esc(ing.amount)}" oninput="updateIngredient(${i},'amount',this.value)">
+    <input class="ing-unit" placeholder="单位" value="${esc(ing.unit)}" oninput="updateIngredient(${i},'unit',this.value)">
+    <button onclick="removeIngredient(${i})">✕</button>
+  </div>`).join('');
+}
+
+function addStep(){tempSteps.push({id:Date.now(),text:''});renderEditSteps();}
+function removeStep(i){tempSteps.splice(i,1);renderEditSteps();}
+function updateStep(i,value){if(tempSteps[i])tempSteps[i].text=value;}
+function renderEditSteps(){
+  const el=document.getElementById('stepList');
+  if(tempSteps.length===0){el.innerHTML='<div style="font-size:12px;color:var(--ink-s);padding:4px 0;">点击下方按钮添加步骤</div>';return;}
+  el.innerHTML=tempSteps.map((s,i)=>`<div class="ingredient-row">
+    <span style="font-weight:700;color:var(--accent);min-width:20px;">${i+1}.</span>
+    <input placeholder="步骤描述…" value="${esc(s.text)}" oninput="updateStep(${i},this.value)" style="flex:1;">
+    <button onclick="removeStep(${i})">✕</button>
+  </div>`).join('');
+}
+
+function saveRecipe(){
+  const name=document.getElementById('eName').value.trim();if(!name){toast('⚠ 请输入食谱名称');return;}
+  const data={
+    name,emoji:document.getElementById('eEmoji').value||'🍽️',
+    category:document.getElementById('eCat').value,
+    time:parseInt(document.getElementById('eTime').value)||30,
+    difficulty:document.getElementById('eDiff').value,
+    servings:document.getElementById('eServings').value||'',
+    ingredients:tempIngredients.filter(i=>i.name.trim()),
+    steps:tempSteps.filter(s=>s.text.trim()),
+    notes:document.getElementById('eNotes').value.trim(),
+  };
+  if(editingId){
+    const r=recipes.find(x=>x.id===editingId);if(r){Object.assign(r,data);}
+  }else{
+    recipes.unshift({id:Date.now(),...data,favorite:false,createdAt:new Date().toISOString()});
+  }
+  save();closeEdit();renderAll();toast(editingId?'✅ 已更新':'🍳 食谱已添加');
+}
+
+function toggleFav(id,ev){
+  ev.stopPropagation();
+  const r=recipes.find(x=>x.id===id);if(!r)return;
+  r.favorite=!r.favorite;save();renderAll();toast(r.favorite?'❤️ 已收藏':'已取消收藏');
+}
+
+function deleteRecipe(id){
+  const r=recipes.find(x=>x.id===id);if(!r)return;
+  const idx=recipes.indexOf(r);
+  const del=()=>{const bak=recipes.splice(idx,1)[0];save();renderAll();showUndo(`已删除: ${bak.name}`,()=>{recipes.splice(idx,0,bak);save();renderAll();});};
+  del();
+}
+
+// Detail modal
+function openDetail(id){
+  const r=recipes.find(x=>x.id===id);if(!r)return;
+  detailId=id;const diffLabels={easy:'🌿 简单',medium:'⚡ 中等',hard:'🔥 困难'};
+  document.getElementById('detailContent').innerHTML=`
+    <div class="md-header"><span class="md-emoji">${r.emoji||'🍽️'}</span>
+      <div class="md-name">${esc(r.name)}</div>
+      <div class="md-meta">
+        <span class="rc-tag time">⏱ ${r.time} 分钟</span>
+        <span class="rc-tag diff ${r.difficulty}">${diffLabels[r.difficulty]||r.difficulty}</span>
+        <span class="rc-tag time">🍽 ${esc(r.servings||'')}</span>
+        <span class="tag" style="background:var(--accent-soft);color:var(--accent);padding:2px 8px;border-radius:10px;font-size:11px;">${r.category}</span>
+      </div>
+    </div>
+    ${(r.ingredients||[]).length?`<div class="md-section"><h4>🥬 食材</h4><ul class="ingredient-list">${r.ingredients.map(i=>`<li><span class="ing-name">${esc(i.name)}</span><span class="ing-amount">${i.amount||''} ${i.unit||''}</span></li>`).join('')}</ul></div>`:''}
+    ${(r.steps||[]).length?`<div class="md-section"><h4>📋 步骤</h4><ol class="step-list">${r.steps.map(s=>`<li>${esc(s.text)}</li>`).join('')}</ol></div>`:''}
+    ${r.notes?`<div class="md-section"><h4>💬 备注</h4><div class="md-notes">${esc(r.notes)}</div></div>`:''}
+  `;
+  document.getElementById('detailEditBtn').onclick=()=>{closeDetail();openEditModal(id);};
+  document.getElementById('detailModal').classList.add('show');
+}
+function closeDetail(){document.getElementById('detailModal').classList.remove('show');detailId=null;}
+function editFromDetail(){if(detailId){closeDetail();openEditModal(detailId);}}
+
+// Random picker
+function pickRandom(){
+  const rs=getFiltered().length?getFiltered():recipes;
+  if(rs.length===0){document.getElementById('randomResult').innerHTML='<span style="font-size:14px;color:var(--ink-s);">还没有食谱，先添加几道吧 ✨</span>';return;}
+  const btn=document.getElementById('randomBtn');btn.classList.add('spinning');setTimeout(()=>btn.classList.remove('spinning'),600);
+  const r=rs[Math.floor(Math.random()*rs.length)];
+  document.getElementById('randomResult').innerHTML=`<span class="rr-emoji">${r.emoji||'🍽️'}</span>${esc(r.name)}<div class="rr-tags">${r.category} · ${r.time}分钟 · ${r.difficulty==='easy'?'简单':r.difficulty==='medium'?'中等':'困难'}</div>`;
+}
+function pickRandomBig(){
+  if(recipes.length===0){document.getElementById('pickerResult').textContent='先添加几道食谱吧 ✨';return;}
+  const r=recipes[Math.floor(Math.random()*recipes.length)];
+  document.getElementById('pickerEmoji').textContent=r.emoji||'🍽️';
+  document.getElementById('pickerResult').innerHTML=`<div>${esc(r.name)}</div><div style="font-size:14px;color:var(--ink-m);margin-top:4px;">${r.category} · ${r.time}分钟</div>`;
+}
+
+// Render recipes
+function renderRecipes(){
+  const filtered=getFiltered();
+  const grid=document.getElementById('recipeGrid');
+  if(!grid)return;
+  if(filtered.length===0){
+    grid.innerHTML=`<div style="grid-column:1/-1;"><div class="empty-state"><div class="es-frame"><span class="es-icon">🍽️</span><div class="es-title">${recipes.length===0?'收藏你的第一道食谱':'没有匹配的食谱'}</div><div class="es-desc">${recipes.length===0?'记录家常味道、拿手好菜，建立属于自己的私房食谱库':'试试更换筛选条件或搜索关键词'}</div></div>${recipes.length===0?'<div class="es-arrow">↓</div>':''}</div></div>`;
+    return;
+  }
+  grid.innerHTML=filtered.map(r=>`
+    <div class="recipe-card" onclick="openDetail(${r.id})">
+      <div class="rc-img cat-${r.category}">${r.emoji||'🍽️'}<span class="rc-fav" onclick="toggleFav(${r.id},event)">${r.favorite?'❤️':'🤍'}</span></div>
+      <div class="rc-body">
+        <div class="rc-name">${esc(r.name)}</div>
+        <div class="rc-meta">
+          <span class="rc-tag time">⏱ ${r.time}′</span>
+          <span class="rc-tag diff ${r.difficulty}">${r.difficulty==='easy'?'简单':r.difficulty==='medium'?'中等':'困难'}</span>
+          <span class="rc-tag time">${r.category}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderFavs(){
+  const favs=recipes.filter(r=>r.favorite);
+  const grid=document.getElementById('favGrid');
+  if(!grid)return;
+  if(favs.length===0){
+    grid.innerHTML=`<div style="grid-column:1/-1;"><div class="empty-state"><div class="es-frame"><span class="es-icon">❤️</span><div class="es-title">还没有收藏的食谱</div><div class="es-desc">点击食谱卡片右上角的心形图标来收藏</div></div></div></div>`;
+    return;
+  }
+  grid.innerHTML=favs.map(r=>`
+    <div class="recipe-card" onclick="openDetail(${r.id})">
+      <div class="rc-img cat-${r.category}">${r.emoji||'🍽️'}<span class="rc-fav" onclick="toggleFav(${r.id},event)">❤️</span></div>
+      <div class="rc-body">
+        <div class="rc-name">${esc(r.name)}</div>
+        <div class="rc-meta">
+          <span class="rc-tag time">⏱ ${r.time}′</span>
+          <span class="rc-tag diff ${r.difficulty}">${r.difficulty==='easy'?'简单':r.difficulty==='medium'?'中等':'困难'}</span>
+          <span class="rc-tag time">${r.category}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderAll(){
+  document.getElementById('recipeCount2').textContent=recipes.length;
+  document.getElementById('allCount').textContent=recipes.length;
+  // Hero update
+  const cnt=recipes.length;
+  document.getElementById('heroTitle').textContent=cnt===0?'收集美味，料理生活':cnt<5?'私房食谱，慢慢积累':`${cnt} 道私房食谱`;
+  document.getElementById('heroSub').textContent=cnt===0?'每一道菜都是一段温暖的记忆':cnt<10?'好味道值得被记住':'厨房里的幸福时光 🍳';
+
+  if(activeTab==='all')renderRecipes();
+  if(activeTab==='fav')renderFavs();
+}
+
+// Sidebar quote
+const sqEl=document.getElementById('sidebarQuote');
+if(sqEl)sqEl.textContent='「'+foodQuotes[Math.floor(Math.random()*foodQuotes.length)]+'」';
+setInterval(()=>{const el=document.getElementById('sidebarQuote');if(el)el.textContent='「'+foodQuotes[Math.floor(Math.random()*foodQuotes.length)]+'」';},15000);
+
+// Init
+initTheme();load();
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDetail();closeEdit();}});
+renderAll();
+
+// Register Service Worker
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+</script>
+</body>
+</html>
